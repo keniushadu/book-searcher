@@ -5,6 +5,10 @@ interface TauriConfig {
   ipfs_gateways: string[];
 }
 
+const DEFAULT_GATEWAY = 'https://cloudflare-ipfs.com';
+const DEFAULT_GATEWAY_CHECKER = 'https://ipfs-checker.1kbtool.com';
+
+
 export default async function getIpfsGateways() {
   if (import.meta.env.VITE_TAURI === '1') {
     const api = await import('@tauri-apps/api');
@@ -24,8 +28,10 @@ export function parseIpfsGateways(text: string) {
 }
 
 export function getDownloadLinkFromIPFS(gateway: string, book: Book) {
-  return (
-    `${gateway}/ipfs/${book.ipfs_cid}?filename=` +
-    encodeURIComponent(`${book.title}_${book.author}.${book.extension}`)
-  );
+   if (gateway === DEFAULT_GATEWAY_CHECKER) {
+    // 如果选择了默认网关，就去掉/ipfs/路径
+    return `${gateway}/${book.ipfs_cid}?filename=${encodeURIComponent(`${book.title}_${book.author}.${book.extension}`)}`;
+  } else {
+    return `${gateway}/ipfs/${book.ipfs_cid}?filename=${encodeURIComponent(`${book.title}_${book.author}.${book.extension}`)}`;
+  }
 }
